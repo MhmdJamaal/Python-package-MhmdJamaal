@@ -1,4 +1,4 @@
-name: Publish to PyPI
+name: Publish to TestPyPI
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Build package using Hatch
         run: |
-            hatch run build:check
+            hatch build --clean
 
             echo ""
             echo "Generated files:"
@@ -58,9 +58,9 @@ jobs:
     runs-on: ubuntu-latest
     # Environment required here for trusted publisher
     environment:
-      name: pypi
+      name: testpypi
       # Modify the url to be the name of your package
-      url: https://pypi.org/p/pyospackage_moham136
+      url: https://test.pypi.org/p/pyospackage_moham136
     permissions:
       id-token: write  # this permission is mandatory for PyPI publishing
     steps:
@@ -70,7 +70,10 @@ jobs:
           name: python-package-distributions
           path: dist/
           merge-multiple: true
-      - name: Publish package to PyPI
+      - name: Publish package to TestPyPI
         # Only publish to real PyPI on release. This action uses sigstore for additional security.
         if: github.event_name == 'release' && github.event.action == 'published'
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e #v1.13.0
+        with:
+          repository-url: https://test.pypi.org/legacy/
+        
